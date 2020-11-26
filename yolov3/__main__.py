@@ -131,82 +131,89 @@ def main():
         with open(args["class_names"], "r") as f:
             class_names = [line.strip() for line in f.readlines()]
 
-    if args["image"]:
-        source = "image"
-    elif args["video"]:
-        source = "video"
-    else:
-        source = "cam"
-        # If --cam argument is str representation of an int, interpret it as
-        # an int device ID. Else interpret as a path to a video capture stream.
-        if isinstance(args["cam"], str) and args["cam"].isdigit():
-            args["cam"] = int(args["cam"])
+    yolov3.detect_in_cam(
+        net, cam_id=args["cam"], device=device,
+        prob_thresh=args["prob_thresh"],
+        nms_iou_thresh=args["iou_thresh"],
+        class_names=class_names, show_fps=args["show_fps"],
+        frames=None
+    )
+    # if args["image"]:
+    #     source = "image"
+    # elif args["video"]:
+    #     source = "video"
+    # else:
+    #     source = "cam"
+    #     # If --cam argument is str representation of an int, interpret it as
+    #     # an int device ID. Else interpret as a path to a video capture stream.
+    #     if isinstance(args["cam"], str) and args["cam"].isdigit():
+    #         args["cam"] = int(args["cam"])
 
-    if source == "image":
-        if os.path.isdir(args["image"]):
-            image_dir = args["image"]
-            fnames = os.listdir(image_dir)
-        else:
-            image_dir, fname = os.path.split(args["image"])
-            fnames = [fname]
+    # if source == "image":
+    #     if os.path.isdir(args["image"]):
+    #         image_dir = args["image"]
+    #         fnames = os.listdir(image_dir)
+    #     else:
+    #         image_dir, fname = os.path.split(args["image"])
+    #         fnames = [fname]
 
-        images = []
-        for fname in fnames:
-            images.append(cv2.imread(os.path.join(image_dir, fname)))
+    #     images = []
+    #     for fname in fnames:
+    #         images.append(cv2.imread(os.path.join(image_dir, fname)))
 
-        # TODO: batch images
-        results = []
-        for image in images:
-            results.extend(
-                yolov3.inference(
-                    net, image, device=device, prob_thresh=args["prob_thresh"],
-                    nms_iou_thresh=args["iou_thresh"]
-                )
-            )
+    #     # TODO: batch images
+    #     results = []
+    #     for image in images:
+    #         results.extend(
+    #             yolov3.inference(
+    #                 net, image, device=device, prob_thresh=args["prob_thresh"],
+    #                 nms_iou_thresh=args["iou_thresh"]
+    #             )
+    #         )
 
-        for image, (bbox_xywh, _, class_idx) in zip(images, results):
-            yolov3.draw_boxes(
-                image, bbox_xywh, class_idx=class_idx, class_names=class_names
-            )
-            cv2.imshow("YOLOv3", image)
-            cv2.waitKey(0)
-    else:
-        frames = None
-        if args["output"]:
-            frames = []
+    #     for image, (bbox_xywh, _, class_idx) in zip(images, results):
+    #         yolov3.draw_boxes(
+    #             image, bbox_xywh, class_idx=class_idx, class_names=class_names
+    #         )
+    #         cv2.imshow("YOLOv3", image)
+    #         cv2.waitKey(0)
+    # else:
+    #     frames = None
+    #     if args["output"]:
+    #         frames = []
 
-        if source == "cam":
-            start_time = time.time()
+    #     if source == "cam":
+    #         start_time = time.time()
 
-            # Wrap in try/except block so that output video is written
-            # even if an error occurs while streaming webcam input.
-            try:
-                yolov3.detect_in_cam(
-                    net, cam_id=args["cam"], device=device,
-                    prob_thresh=args["prob_thresh"],
-                    nms_iou_thresh=args["iou_thresh"],
-                    class_names=class_names, show_fps=args["show_fps"],
-                    frames=frames
-                )
-            except Exception as e:
-                raise e
-            finally:
-                if args["output"] and frames:
-                    # Get average FPS and write output at that framerate.
-                    fps = 1 / ((time.time() - start_time) / len(frames))
-                    write_mp4(frames, fps, args["output"])
-        elif source == "video":
-            yolov3.detect_in_video(
-                net, filepath=args["video"], device=device,
-                prob_thresh=args["prob_thresh"],
-                nms_iou_thresh=args["iou_thresh"], class_names=class_names,
-                frames=frames
-            )
-            if args["output"] and frames:
-                # Get input video FPS and write output video at same FPS.
-                cap = cv2.VideoCapture(args["video"])
-                fps = cap.get(cv2.CAP_PROP_FPS)
-                cap.release()
-                write_mp4(frames, fps, args["output"])
+    #         # Wrap in try/except block so that output video is written
+    #         # even if an error occurs while streaming webcam input.
+    #         try:
+    #             yolov3.detect_in_cam(
+    #                 net, cam_id=args["cam"], device=device,
+    #                 prob_thresh=args["prob_thresh"],
+    #                 nms_iou_thresh=args["iou_thresh"],
+    #                 class_names=class_names, show_fps=args["show_fps"],
+    #                 frames=frames
+    #             )
+    #         except Exception as e:
+    #             raise e
+    #         finally:
+    #             if args["output"] and frames:
+    #                 # Get average FPS and write output at that framerate.
+    #                 fps = 1 / ((time.time() - start_time) / len(frames))
+    #                 write_mp4(frames, fps, args["output"])
+    #     elif source == "video":
+    #         yolov3.detect_in_video(
+    #             net, filepath=args["video"], device=device,
+    #             prob_thresh=args["prob_thresh"],
+    #             nms_iou_thresh=args["iou_thresh"], class_names=class_names,
+    #             frames=frames
+    #         )
+    #         if args["output"] and frames:
+    #             # Get input video FPS and write output video at same FPS.
+    #             cap = cv2.VideoCapture(args["video"])
+    #             fps = cap.get(cv2.CAP_PROP_FPS)
+    #             cap.release()
+    #             write_mp4(frames, fps, args["output"])
 
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()

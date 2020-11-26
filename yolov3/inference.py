@@ -9,7 +9,7 @@ import torch
 
 
 class VideoGetter():
-    def __init__(self, src=0):
+    def __init__(self, src=-1):
         """
         Class to read frames from a VideoCapture in a dedicated thread.
 
@@ -455,22 +455,24 @@ def detect_in_cam(
             completes. Because mutables (like lists) are passed by reference
             and are modified in-place, this function has no return value.
     """
-    video_getter = VideoGetter(cam_id).start()
-    video_shower = VideoShower(video_getter.frame, "YOLOv3").start()
+    # video_getter = VideoGetter(cam_id).start()
+    # video_shower = VideoShower(video_getter.frame, "YOLOv3").start()
 
     # Number of frames to average for computing FPS.
     num_fps_frames = 30
     previous_fps = deque(maxlen=num_fps_frames)
+    cam = cv2.VideoCapture(0)
 
     while True:
         loop_start_time = time.time()
+        ret_val, frame = cam.read()
 
-        if video_getter.stopped or video_shower.stopped:
-            video_getter.stop()
-            video_shower.stop()
-            break
+        # if video_getter.stopped or video_shower.stopped:
+        #     video_getter.stop()
+        #     video_shower.stop()
+        #     break
 
-        frame = video_getter.frame
+        # frame = video_getter.frame
         bbox_tlbr, _, class_idx = inference(
             net, frame, device=device, prob_thresh=prob_thresh,
             nms_iou_thresh=nms_iou_thresh
@@ -486,12 +488,16 @@ def detect_in_cam(
                 (255, 255, 255)
             )
 
-        video_shower.frame = frame
+        # video_shower.frame = frame
         if frames is not None:
             frames.append(frame)
 
         previous_fps.append(int(1 / (time.time() - loop_start_time)))
-
+        print(frame)
+        cv2.imshow("my_webam", frame)
+        if cv2.waitKey(1) == 27: 
+            break  # esc to quit
+    cv2.destroyAllWindows()
 
 def detect_in_video(
     net, filepath, device="cuda", prob_thresh=0.05, nms_iou_thresh=0.3,
