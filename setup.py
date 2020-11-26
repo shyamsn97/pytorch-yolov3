@@ -7,7 +7,7 @@ setup(
     author="Najam R Syed",
     author_email="najam.r.syed@gmail.com",
     license="MIT",
-    packages=find_packages(include=["yolov3", "yolov3.devtools"]),
+    packages=find_packages(include=["yolov3"]),
     install_requires=[
     ],
     entry_points={
