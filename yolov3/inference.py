@@ -157,20 +157,20 @@ def draw_boxes(
                 bbox_text.append("({:.2f})".format(class_prob[i]))
 
             bbox_text = " ".join(bbox_text)
-
+            color = tuple(map(int, color))
             cv2.rectangle(
-                img, (tl_x, tl_y), (br_x, br_y), color=color, thickness=2
+                img, (tl_x, tl_y), (br_x, br_y), (30,15,130), 2
             )
 
             if bbox_text:
                 cv2.rectangle(
                     img, (tl_x + 1, tl_y + 1),
                     (tl_x + int(8 * len(bbox_text)), tl_y + 18),
-                    color=(20, 20, 20), thickness=cv2.FILLED
+                    (20, 20, 20), cv2.FILLED
                 )
                 cv2.putText(
                     img, bbox_text, (tl_x + 1, tl_y + 13),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), thickness=1
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1
                 )
 
 
