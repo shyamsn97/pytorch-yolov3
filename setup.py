@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="pytorch-yolov3",
@@ -7,11 +7,8 @@ setup(
     author="Najam R Syed",
     author_email="najam.r.syed@gmail.com",
     license="MIT",
-    packages=["yolov3", "yolov3.devtools"],
+    packages=find_packages(include=["yolov3", "yolov3.devtools"]),
     install_requires=[
-        "numpy",
-        "opencv-python",
-        "torch"
     ],
     entry_points={
         "console_scripts": ["yolov3 = yolov3.__main__:main"]

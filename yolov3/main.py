@@ -138,6 +138,8 @@ def main():
         class_names=class_names, show_fps=args["show_fps"],
         frames=None
     )
+if __name__ == "__main__":
+    main()
     # if args["image"]:
     #     source = "image"
     # elif args["video"]:

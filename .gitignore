@@ -1,4 +1,6 @@
 *.egg-info
 *.swp
 __pycache__
-models/*.weights
+**/*/*.weights
+**/build/*
+**/dist/*
